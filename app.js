@@ -1,4 +1,4 @@
-const file = "samples.json";
+const file = "/samples.json";
 let myArray = [];
 let myArray1 = [];
 let myArray2 = [];
