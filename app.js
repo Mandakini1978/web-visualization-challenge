@@ -1,3 +1,4 @@
+//Use the D3 library to read in samples.json.
 const file = "samples.json";
 let myArray = [];
 let myArray1 = [];
@@ -35,7 +36,10 @@ d3.json(file).then(function(data) {
  for(let i=0;i<=((data.names).length);i++)
       subject_id.push(data.names[i]);
      // console.log("subject_id",subject_id);
-
+//////////////////////////////////////////////////////////////////
+//Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs
+// found in that individual.
+/////////////////////////////////////////////////////////////////
   let selector = d3.select("#selDataset");
   let sampleNames = subject_id;
             
@@ -46,12 +50,7 @@ d3.json(file).then(function(data) {
             .property("value", sample);
     });
 
-  //console.log("x:",myArray1[0]);
-  //console.log("y:",myArray3[0]);
-  // Trace for the Greek Data
-  
-////////////////////////////////////////////////////////
-
+   
 d3.selectAll("#selDataset").on("change", getData);
 
 // Function called by DOM changes
@@ -59,7 +58,7 @@ function getData() {
   var dropdownMenu = d3.select("#selDataset");
   // Assign the value of the dropdown menu option to a variable
   var dataset = dropdownMenu.property("value");
-  // Initialize an empty array for the country's data
+  // Initialize an empty array for the otu_ids,sample_values,otu_labels
   var x_data = [];
   var y_data = [];
   var name_data = [];
@@ -73,6 +72,11 @@ for(i=0;i<total_samples;i++)
   {  
     var subject_data = [];
     subject_data = Object.keys(sample_Array[i]).map(v => new Array(v, sample_Array[i][v]));
+    //////////////////////////////////////////////////////////////////////////////////
+
+    //sorting and slicing
+
+    ////////////////////////////////////////////////////////////////////////////////////
    /* let new_list = subject_data.map(function(obj) {
       return {
         otu_ids: obj.otu_ids,
@@ -112,6 +116,9 @@ for(i=0;i<total_samples;i++)
     // console.log("y_data",y_data);
 
     */
+   ///////////////////////////////////////////////////////////////////////////////
+   //Display the sample metadata, i.e., an individual's demographic information.
+   //////////////////////////////////////////////////////////////////////////////
     var id_data = [];
     //id_data = Object.keys(sample_Array[i].otu_ids).map(v => new Array(sample_Array[i].otu_ids[v]));
     for(j=0;j<sample_Array[i].otu_ids.length;j++) 
@@ -124,17 +131,9 @@ for(i=0;i<total_samples;i++)
     y_data = id_data;
     name_data = sample_Array[i].otu_labels;
     var weekf = meta_Array[i].wfreq;
+    var y_data_bubble = sample_Array[i].otu_ids
 
-    //console.log("label",name_data);
-    //var age = "age:" 
-    //var bbtype: "I"
-    //var ethnicity: "Caucasian"
-    //var gender: "M"
-    //var id: 960
-    //var location: "Lexington/NC"
-    //var wfreq: 7
-    ///////////////////////////////////////////////////////////
-    // Select the text of an HTML element
+    
 
 // Modify the text of an HTML element
 d3.select("#sample-metadata-id").text("id: "+ meta_Array[i].id);
@@ -145,14 +144,21 @@ d3.select("#sample-metadata-gender").text("gender: "+meta_Array[i].gender);
 d3.select("#sample-metadata-location").text("location: "+meta_Array[i].location);
 d3.select("#sample-metadata-wfreq").text("wfreq: "+meta_Array[i].wfreq);
 
-    ///////////////////////////////////////////////////////////
+    
   }
 }
-   // Call function to update the chart
+
+
+   // Call function to update the charts
   updatePlotly(x_data,y_data,name_data,weekf);
+  updatePlotly_bubble(x_data,y_data_bubble,name_data);
 }
 
-// Update the restyled plot's values
+//////////////////////////////////////////////////////////////////////
+//Horizontal bar plot
+/////////////////////////////////////////////////////////////////////
+
+// Update the horizontal bar plot's values
 function updatePlotly(newdata_x,newdata_y,newname_data,new_wf) {
   console.log(newname_data);
   //Plotly.restyle("plot", "values", [newdata]);
@@ -176,7 +182,7 @@ let layout = {
 Plotly.newPlot("plot", traceData, layout);
 
 ///////////////////////////////////////////////////////////////////
-var trace2 = {
+/*var trace2 = {
   x: newdata_y,
   y: newdata_x,
   mode: 'markers',
@@ -196,11 +202,12 @@ var layout1 = {
   width: 1200
 };
 
-Plotly.newPlot("bubble", data1, layout1);
+Plotly.newPlot("bubble", data1, layout1);*/
   
 
 
 ///////////////////////////////////////////////////////////////////
+//gauge plot
 var data3 = [
   
   {
@@ -217,10 +224,36 @@ var data3 = [
 var layout3 = { width: 600, height: 400 };
 Plotly.newPlot('gauge', data3, layout3);
 
-
-
 }
+///////////////////////////////////////////////////////////////////////
+//bubble plot
 
+function updatePlotly_bubble(newdata_x,newdata_y,name_data)
+ {
+  var trace2 = {
+    x: newdata_y,
+    y: newdata_x,
+    text: name_data,
+    mode: 'markers',
+    marker: {
+      color: newdata_x,
+      size: newdata_x
+    }
+  };
+  
+  var data1 = [trace2];
+  
+  var layout1 = {
+    title: 'Marker Size and Color',
+    showlegend: false,
+    height: 600,
+    width: 1200
+  };
+  
+  Plotly.newPlot("bubble", data1, layout1);
+    
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 });
   
